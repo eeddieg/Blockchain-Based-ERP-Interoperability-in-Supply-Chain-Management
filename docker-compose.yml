@@ -1,0 +1,671 @@
+version: "3"
+services:
+  # Blockchain
+  blockchain-api:
+    build: ./blockchain
+    container_name: blockchain
+    ports:
+      - 3001:3001
+      - 8545:8545
+    # network_mode: host
+    volumes:
+      - ./blockchain:/home/node/app
+    networks:
+      blockchain-tier:
+        ipv4_address: 192.168.111.2
+
+#   =======================================================
+#                         LAYER 1
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_1-mysql_1:
+    image: mysql:latest
+    container_name: layer_1-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l1_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3307
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3307:3307
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_1/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.2
+  # Backend
+  layer_1-backend_api_1:
+    build: ./layer_1/erp1/backend
+    container_name: layer_1-backend_1
+    ports:
+      - 4001:3000
+    volumes:
+      - ./layer_1/erp1/backend/:/backend
+    depends_on:
+      layer_1-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.3
+  # # Frontend
+  layer_1-frontend_1:
+    build: ./layer_1/erp1/frontend
+    container_name: layer_1-app_frontend_1
+    ports:
+      - 8081:8080
+    volumes:
+      - ./layer_1/erp1/frontend:/app
+    links:
+      - layer_1-mysql_1
+      - layer_1-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.4
+  
+#   --------------
+#     ERP2
+#   --------------
+  # Database
+  layer_1-mysql_2:
+    image: mysql:latest
+    container_name: layer_1-db_2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l1_erp2_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3308
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3308:3308
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_1/erp2/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.5
+    # Backend
+  layer_1-backend_api_2:
+    build: ./layer_1/erp2/backend
+    container_name: layer_1-backend_2
+    ports:
+      - 4002:3000
+    volumes:
+      - ./layer_1/erp2/backend/:/backend
+    depends_on:
+      layer_1-mysql_2:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.6
+  # # Frontend
+  layer_1-frontend_2:
+    build: ./layer_1/erp2/frontend
+    container_name: layer_1-app_frontend_2
+    ports:
+      - 8082:8080
+    volumes:
+      - ./layer_1/erp2/frontend:/app
+    links:
+      - layer_1-mysql_2
+      - layer_1-backend_api_2
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.7
+
+#   =======================================================
+#                         LAYER 2
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_2-mysql_1:
+    image: mysql:latest
+    container_name: layer_2-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l2_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3309
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3309:3309
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_2/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.8
+    # Backend
+  layer_2-backend_api_1:
+    build: ./layer_2/erp1/backend
+    container_name: layer_2-backend_1
+    ports:
+      - 4101:3000
+    volumes:
+      - ./layer_2/erp1/backend/:/backend
+    depends_on:
+      layer_2-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.9
+  # # Frontend
+  layer_2-frontend_1:
+    build: ./layer_2/erp1/frontend
+    container_name: layer_2-app_frontend_1
+    ports:
+      - 8181:8080
+    volumes:
+      - ./layer_2/erp1/frontend:/app
+    links:
+      - layer_2-mysql_1
+      - layer_2-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.10
+#   =======================================================
+#                         LAYER 3
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_3-mysql_1:
+    image: mysql:latest
+    container_name: layer_3-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l3_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3310
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3310:3310
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_3/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.11
+  # Backend
+  layer_3-backend_api_1:
+    build: ./layer_3/erp1/backend
+    container_name: layer_3-backend_1
+    ports:
+      - 4201:3000
+    volumes:
+      - ./layer_3/erp1/backend/:/backend
+    depends_on:
+      layer_3-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.12
+  # # Frontend
+  layer_3-frontend_1:
+    build: ./layer_3/erp1/frontend
+    container_name: layer_3-app_frontend_1
+    ports:
+      - 8281:8080
+    volumes:
+      - ./layer_3/erp1/frontend:/app
+    links:
+      - layer_3-mysql_1
+      - layer_3-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.13
+#   =======================================================
+#                         LAYER 4
+#   =======================================================
+
+  # Database
+  layer_4-mysql_1:
+    image: mysql:latest
+    container_name: layer_4-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l4_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3311
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3311:3311
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_4/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.14
+  # Backend
+  layer_4-backend_api_1:
+    build: ./layer_4/erp1/backend
+    container_name: layer_4-backend_1
+    ports:
+      - 4301:3000
+    volumes:
+      - ./layer_4/erp1/backend/:/backend
+    depends_on:
+      layer_4-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.15
+  # Frontend
+  layer_4-frontend_1:
+    build: ./layer_4/erp1/frontend
+    container_name: layer_4-app_frontend_1
+    ports:
+      - 8381:8080
+    volumes:
+      - ./layer_4/erp1/frontend:/app
+    links:
+      - layer_4-mysql_1
+      - layer_4-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.16
+
+  # =======================================================
+  #                       LAYER 5
+  # =======================================================
+  # --------------
+  #   ERP1
+  # --------------
+  # Database
+  layer_5-mysql_1:
+    image: mysql:latest
+    container_name: layer_5-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l5_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3312
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3312:3312
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_5/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.17
+  # Backend
+  layer_5-backend_api_1:
+    build: ./layer_5/erp1/backend
+    container_name: layer_5-backend_1
+    ports:
+      - 4401:3000
+    volumes:
+      - ./layer_5/erp1/backend/:/backend
+    depends_on:
+      layer_5-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.18
+  # Frontend
+  layer_5-frontend_1:
+    build: ./layer_5/erp1/frontend
+    container_name: layer_5-app_frontend_1
+    ports:
+      - 8481:8080
+    volumes:
+      - ./layer_5/erp1/frontend:/app
+    links:
+      - layer_5-mysql_1
+      - layer_5-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.19
+      Blockchain-Based-ERP-Interoperability-in-Supply-Chain-Management
+#   =======================================================
+#                         LAYER 6
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_6-mysql_1:
+    image: mysql:latest
+    container_name: layer_6-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l6_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3313
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3313:3313
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_6/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.20
+  # Backend
+  layer_6-backend_api_1:
+    build: ./layer_6/erp1/backend
+    container_name: layer_6-backend_1
+    ports:
+      - 4501:3000
+    volumes:
+      - ./layer_6/erp1/backend/:/backend
+    depends_on:
+      layer_6-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.21
+  # Frontend
+  layer_6-frontend_1:
+    build: ./layer_6/erp1/frontend
+    container_name: layer_6-app_frontend_1
+    ports:
+      - 8581:8080
+    volumes:
+      - ./layer_6/erp1/frontend:/app
+    links:
+      - layer_6-mysql_1
+      - layer_6-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.22
+#   =======================================================
+#                         LAYER 7
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_7-mysql_1:
+    image: mysql:latest
+    container_name: layer_7-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l7_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3314
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3314:3314
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_7/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.23
+  # Backend
+  layer_7-backend_api_1:
+    build: ./layer_7/erp1/backend
+    container_name: layer_7-backend_1
+    ports:
+      - 4601:3000
+    volumes:
+      - ./layer_7/erp1/backend/:/backend
+    depends_on:
+      layer_7-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.24
+  # Frontend
+  layer_7-frontend_1:
+    build: ./layer_7/erp1/frontend
+    container_name: layer_7-app_frontend_1
+    ports:
+      - 8681:8080
+    volumes:
+      - ./layer_7/erp1/frontend:/app
+    links:
+      - layer_7-mysql_1
+      - layer_7-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.25
+#   =======================================================
+#                         LAYER 8
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_8-mysql_1:
+    image: mysql:latest
+    container_name: layer_8-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l8_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3315
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3315:3315
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_7/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.26
+  # Backend
+  layer_8-backend_api_1:
+    build: ./layer_8/erp1/backend
+    container_name: layer_8-backend_1
+    ports:
+      - 4701:3000
+    volumes:
+      - ./layer_8/erp1/backend/:/backend
+    depends_on:
+      layer_8-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.27
+  # Frontend
+  layer_8-frontend_1:
+    build: ./layer_8/erp1/frontend
+    container_name: layer_8-app_frontend_1
+    ports:
+      - 8781:8080
+    volumes:
+      - ./layer_8/erp1/frontend:/app
+    links:
+      - layer_8-mysql_1
+      - layer_8-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.28
+#   =======================================================
+#                         LAYER 9
+#   =======================================================
+#   --------------
+#     ERP1
+#   --------------
+  # Database
+  layer_9-mysql_1:
+    image: mysql:latest
+    container_name: layer_9-db_1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: l9_erp1_backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+      MYSQL_TCP_PORT: 3316
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3316:3316
+    depends_on:
+      blockchain-api:
+        condition: service_started
+    volumes:
+      - "./layer_9/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.29
+  # Backend
+  layer_9-backend_api_1:
+    build: ./layer_9/erp1/backend
+    container_name: layer_9-backend_1
+    ports:
+      - 4801:3000
+    volumes:
+      - ./layer_9/erp1/backend/:/backend
+    depends_on:
+      layer_9-mysql_1:
+        condition: service_healthy
+        restart: true
+      blockchain-api:
+        condition: service_started
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.30
+  # Frontend
+  layer_9-frontend_1:
+    build: ./layer_9/erp1/frontend
+    container_name: layer_9-app_frontend_1
+    ports:
+      - 8881:8080
+    volumes:
+      - ./layer_9/erp1/frontend:/app
+    links:
+      - layer_9-mysql_1
+      - layer_9-backend_api_1
+      - blockchain-api
+    networks:
+      backend-tier:
+        ipv4_address: 192.168.110.31
+# Docker Networks
+networks:
+  backend-tier:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.110.0/24"
+          gateway: "192.168.110.1"
+  blockchain-tier:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.111.0/29"
+          gateway: "192.168.111.1"
