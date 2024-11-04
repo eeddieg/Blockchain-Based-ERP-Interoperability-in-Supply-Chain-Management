@@ -396,7 +396,6 @@ services:
     networks:
       backend-tier:
         ipv4_address: 192.168.110.19
-      Blockchain-Based-ERP-Interoperability-in-Supply-Chain-Management
 #   =======================================================
 #                         LAYER 6
 #   =======================================================
