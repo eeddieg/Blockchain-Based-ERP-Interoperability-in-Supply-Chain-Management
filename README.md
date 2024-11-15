@@ -9,5 +9,5 @@ To start the app run:<br/>
 start.sh<br/>
 
 <br/>
-> [!TIP]
+> [!WARNING]
 > The file automates installation of Node packages and docker composer start.
