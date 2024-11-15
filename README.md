@@ -3,8 +3,9 @@ Blockchain based ERP interoperability in Supply Chain Management including token
 &nbsp;&nbsp;
 > [!IMPORTANT]
 > Node version 16.20.2 required!
+
 &nbsp;&nbsp;
 To start the app run:
-> start.sh
+start.sh
 &nbsp;
 The file automates installation of Node packages and docker composer start.
