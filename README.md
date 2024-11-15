@@ -3,6 +3,7 @@ Blockchain based ERP interoperability in Supply Chain Management including token
 <br/><br/>
 > [!IMPORTANT]
 > Node version 16.20.2 required!
+
 <br/><br/>
 To start the app run:<br/>
 start.sh
