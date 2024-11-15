@@ -7,6 +7,7 @@ Blockchain based ERP interoperability in Supply Chain Management including token
 <br/>
 To start the app run:<br/>
 start.sh
+
 <br/>
 > [!NOTE]
 > The file automates installation of Node packages and docker composer start.
