@@ -1,5 +1,7 @@
 # Blockchain-Based-ERP-Interoperability-in-Supply-Chain-Management
-Blockchain based ERP interoperability in Supply Chain Management including tokenization for tracing products
+Blockchain based ERP interoperability in Supply Chain Management including tokenization for tracing products.
+
+This POC consists of a supply chain of nine layers. Each layer connects to the blockchain server but none to each other.
 
 > [!WARNING]
 > - Node version 16.20.2 required!<br/>
