@@ -1,4 +1,3 @@
-version: "3"
 services:
   # Blockchain
   blockchain-api:
@@ -55,15 +54,15 @@ services:
     volumes:
       - ./layer_1/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_1-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
-        condition: service_started
     networks:
       backend-tier:
         ipv4_address: 192.168.110.3
-  # # Frontend
+  # Frontend
   layer_1-frontend_1:
     build: ./layer_1/erp1/frontend
     container_name: layer_1-app_frontend_1
@@ -71,6 +70,9 @@ services:
       - 8081:8080
     volumes:
       - ./layer_1/erp1/frontend:/app
+    depends_on:
+      layer_9-backend_api_1:
+        condition: service_started
     links:
       - layer_1-mysql_1
       - layer_1-backend_api_1
@@ -103,12 +105,14 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_1-mysql_1:
+        condition: service_started
     volumes:
       - "./layer_1/erp2/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
       backend-tier:
         ipv4_address: 192.168.110.5
-    # Backend
+  # Backend
   layer_1-backend_api_2:
     build: ./layer_1/erp2/backend
     container_name: layer_1-backend_2
@@ -117,15 +121,17 @@ services:
     volumes:
       - ./layer_1/erp2/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_1-mysql_2:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_1-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
         ipv4_address: 192.168.110.6
-  # # Frontend
+  # Frontend
   layer_1-frontend_2:
     build: ./layer_1/erp2/frontend
     container_name: layer_1-app_frontend_2
@@ -133,6 +139,9 @@ services:
       - 8082:8080
     volumes:
       - ./layer_1/erp2/frontend:/app
+    depends_on:
+      layer_1-frontend_1:
+        condition: service_started
     links:
       - layer_1-mysql_2
       - layer_1-backend_api_2
@@ -168,12 +177,14 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_1-mysql_2:
+        condition: service_started  
     volumes:
       - "./layer_2/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
       backend-tier:
         ipv4_address: 192.168.110.8
-    # Backend
+  # Backend
   layer_2-backend_api_1:
     build: ./layer_2/erp1/backend
     container_name: layer_2-backend_1
@@ -182,15 +193,17 @@ services:
     volumes:
       - ./layer_2/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_2-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_1-backend_api_2:
         condition: service_started
     networks:
       backend-tier:
         ipv4_address: 192.168.110.9
-  # # Frontend
+  # Frontend
   layer_2-frontend_1:
     build: ./layer_2/erp1/frontend
     container_name: layer_2-app_frontend_1
@@ -198,6 +211,9 @@ services:
       - 8181:8080
     volumes:
       - ./layer_2/erp1/frontend:/app
+    depends_on:
+      layer_1-frontend_2:
+        condition: service_started
     links:
       - layer_2-mysql_1
       - layer_2-backend_api_1
@@ -232,6 +248,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_2-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_3/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -246,10 +264,12 @@ services:
     volumes:
       - ./layer_3/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_3-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_2-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -262,6 +282,9 @@ services:
       - 8281:8080
     volumes:
       - ./layer_3/erp1/frontend:/app
+    depends_on:
+      layer_2-frontend_1:
+        condition: service_started
     links:
       - layer_3-mysql_1
       - layer_3-backend_api_1
@@ -294,6 +317,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_3-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_4/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -308,10 +333,12 @@ services:
     volumes:
       - ./layer_4/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_4-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_3-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -324,6 +351,9 @@ services:
       - 8381:8080
     volumes:
       - ./layer_4/erp1/frontend:/app
+    depends_on:
+      layer_3-frontend_1:
+        condition: service_started
     links:
       - layer_4-mysql_1
       - layer_4-backend_api_1
@@ -359,6 +389,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_4-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_5/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -373,10 +405,12 @@ services:
     volumes:
       - ./layer_5/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_5-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_4-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -389,6 +423,9 @@ services:
       - 8481:8080
     volumes:
       - ./layer_5/erp1/frontend:/app
+    depends_on:
+      layer_4-frontend_1:
+        condition: service_started
     links:
       - layer_5-mysql_1
       - layer_5-backend_api_1
@@ -423,6 +460,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_5-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_6/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -437,10 +476,12 @@ services:
     volumes:
       - ./layer_6/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_6-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_5-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -453,6 +494,9 @@ services:
       - 8581:8080
     volumes:
       - ./layer_6/erp1/frontend:/app
+    depends_on:
+      layer_5-frontend_1:
+        condition: service_started
     links:
       - layer_6-mysql_1
       - layer_6-backend_api_1
@@ -487,6 +531,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_6-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_7/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -501,10 +547,12 @@ services:
     volumes:
       - ./layer_7/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_7-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_6-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -517,6 +565,9 @@ services:
       - 8681:8080
     volumes:
       - ./layer_7/erp1/frontend:/app
+    depends_on:
+      layer_6-frontend_1:
+        condition: service_started
     links:
       - layer_7-mysql_1
       - layer_7-backend_api_1
@@ -551,6 +602,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_7-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_7/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -565,10 +618,12 @@ services:
     volumes:
       - ./layer_8/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_8-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_7-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -581,6 +636,9 @@ services:
       - 8781:8080
     volumes:
       - ./layer_8/erp1/frontend:/app
+    depends_on:
+      layer_7-frontend_1:
+        condition: service_started
     links:
       - layer_8-mysql_1
       - layer_8-backend_api_1
@@ -615,6 +673,8 @@ services:
     depends_on:
       blockchain-api:
         condition: service_started
+      layer_8-mysql_1:
+        condition: service_started  
     volumes:
       - "./layer_9/erp1/sqlserver/data.sql:/docker-entrypoint-initdb.d/data.sql"
     networks:
@@ -629,10 +689,12 @@ services:
     volumes:
       - ./layer_9/erp1/backend/:/backend
     depends_on:
+      blockchain-api:
+        condition: service_started
       layer_9-mysql_1:
         condition: service_healthy
         restart: true
-      blockchain-api:
+      layer_8-backend_api_1:
         condition: service_started
     networks:
       backend-tier:
@@ -645,6 +707,9 @@ services:
       - 8881:8080
     volumes:
       - ./layer_9/erp1/frontend:/app
+    depends_on:
+      layer_8-frontend_1:
+        condition: service_started
     links:
       - layer_9-mysql_1
       - layer_9-backend_api_1
@@ -652,7 +717,10 @@ services:
     networks:
       backend-tier:
         ipv4_address: 192.168.110.31
-# Docker Networks
+
+#   =======================================================
+#                         Docker Networks
+#   =======================================================
 networks:
   backend-tier:
     driver: bridge

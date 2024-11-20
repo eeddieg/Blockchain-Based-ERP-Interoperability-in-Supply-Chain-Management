@@ -3,7 +3,7 @@ RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 COPY package*.json ./
 RUN apt-get update
-RUN apt-get -y upgrade
+# RUN apt-get -y upgrade
 RUN apt-get install -y build-essential libssl-dev libffi-dev software-properties-common
 RUN apt-get install -y python3-dev python3-pip
 
@@ -12,7 +12,7 @@ RUN curl -o /usr/bin/solc -fL https://github.com/ethereum/solidity/releases/down
 RUN chmod 777 /usr/bin/solc
 
 USER node
-RUN npm i
+RUN npm i && npm cache clean --force
 # RUN npm i express
 RUN mkdir -p /home/node/.local/bin
 

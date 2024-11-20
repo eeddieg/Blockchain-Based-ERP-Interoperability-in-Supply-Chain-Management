@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y openssl
 WORKDIR /backend
 ADD prisma /backend/prisma
 COPY package*.json ./
-RUN npm i
+RUN npm i && npm cache clean --force
 # RUN npm run dbReset
 # RUN npm i && npm run dbReset
 # RUN npm i && npx prisma generate && npx prisma db push && npx prisma db seed
