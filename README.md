@@ -10,8 +10,8 @@ This POC consists of a supply chain of nine layers. Each layer connects to the b
 
 
 ### Application start
-To start the app two sterps are needed:<br/>
-  - run "bash install.sh" to run the command "npm i" in every subfolder
+To start the app two steps are needed:<br/>
+  - run "bash install.sh" to run the command "npm i" in every subfolder. 
   - run "bash start.sh" to run the command "docker compose up"
   - run "bash stop.sh" to run the command "docker compose down"
 <br/>
