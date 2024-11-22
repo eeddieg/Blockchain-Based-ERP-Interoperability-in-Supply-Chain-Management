@@ -4,7 +4,7 @@ Blockchain based ERP interoperability in Supply Chain Management including token
 This POC consists of a supply chain of nine layers. Each layer connects to the blockchain server but none to each other.
 
 > [!WARNING]
-> - Docker and Docker compose must be installed.<br/>
+> - Docker and Docker Compose must be installed.<br/>
 > - 12GB of spare disk space required<br/>
 
 
